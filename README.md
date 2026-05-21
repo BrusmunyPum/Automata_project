@@ -1,12 +1,19 @@
 # Robot Navigation Using Finite Automata
 
-This project is a visual robot navigation simulator for an Automata assignment. It uses a finite-automaton-style validator to check command sequences before simulating the robot on an 8x8 grid.
+This project is a visual robot navigation simulator for an Automata assignment. It validates command sequences with finite-automaton-style state rules before running the robot simulation on an 8x8 grid.
 
 ## How To Run
 
 Open `index.html` in a browser.
 
 No installation, build command, or external library is required. The project uses plain HTML, CSS, and JavaScript modules.
+
+## How To Use
+
+1. Type or edit a command sequence in the command box.
+2. Click `Validate` to check the sequence.
+3. If the sequence is valid, click `Run` to simulate the robot.
+4. Click `Reset` to return the robot to the starting state.
 
 ## Command Alphabet
 
@@ -94,29 +101,30 @@ This is invalid because it creates a clockwise loop and also attempts to pick tw
 
 ```text
 .
-├── index.html
-├── style.css
-├── README.md
-├── Project-automata.pdf
-└── src/
-    ├── main.js
-    ├── automaton.js
-    ├── simulator.js
-    ├── renderer.js
-    ├── movement.js
-    └── constants.js
++-- index.html
++-- README.md
++-- Project-automata.pdf
++-- css/
+|   +-- style.css
++-- js/
+    +-- main.js
+    +-- automaton.js
+    +-- simulator.js
+    +-- renderer.js
+    +-- movement.js
+    +-- constants.js
 ```
 
 ## File Explanation
 
 - `index.html`: main page layout
-- `style.css`: all UI styling and animation
-- `src/main.js`: connects buttons, validation, running, stepping, and reset
-- `src/automaton.js`: validates command sequences using automaton state variables
-- `src/simulator.js`: updates robot state during simulation
-- `src/renderer.js`: updates the grid, status cards, timeline, logs, and energy UI
-- `src/movement.js`: helper functions for movement, turning, direction names, and grid bounds
-- `src/constants.js`: shared constants such as grid size, max energy, directions, and command alphabet
+- `css/style.css`: all UI styling and animation
+- `js/main.js`: connects buttons, validation, running, and reset
+- `js/automaton.js`: validates command sequences using automaton state variables
+- `js/simulator.js`: updates robot state during simulation
+- `js/renderer.js`: updates the grid, status cards, timeline, logs, and energy UI
+- `js/movement.js`: helper functions for movement, turning, direction names, and grid bounds
+- `js/constants.js`: shared constants such as grid size, max energy, directions, and command alphabet
 
 ## Automaton State Variables
 
@@ -146,8 +154,8 @@ Each command causes a transition by updating these values. If a command violates
 - 3D-style robot marker
 - command validation messages
 - command timeline with active step highlighting
-- step-by-step simulation
-- run, pause, reset controls
+- automatic simulation with `Run`
+- `Validate`, `Run`, and `Reset` controls
 - animated energy cells
 - robot state dashboard
 - execution log
