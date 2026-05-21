@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Navigation Automata</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Finite Automata Project</p>
+      <h1>Robot Navigation Simulator</h1>
+    </div>
+    <div class="header-stats" aria-label="Project facts">
+      <span>8x8 Grid</span>
+      <span>Energy 5</span>
+      <span>DFA Validation</span>
+    </div>
+  </header>
+
+  <main class="app-layout">
+    <section class="panel command-panel">
+      <div class="section-title">
+        <h2>Command Sequence</h2>
+        <span id="validationBadge" class="badge neutral">Not validated</span>
+      </div>
+
+      <textarea id="commandInput" spellcheck="false">START R F L F R RECHARGE F L PICK DROP F R F RECHARGE F L PICK DROP F L STOP</textarea>
+
+      <div class="button-row">
+        <button id="validateBtn">Validate</button>
+        <button id="runBtn" class="secondary">Run</button>
+        <button id="resetBtn" class="ghost">Reset</button>
+      </div>
+
+      <div class="hint">
+        Commands: <code>START</code>, <code>STOP</code>, <code>F</code>, <code>B</code>, <code>L</code>, <code>R</code>, <code>PICK</code>, <code>DROP</code>, <code>RECHARGE</code>
+      </div>
+
+      <div class="timeline-panel">
+        <div class="mini-title">
+          <h3>Command Timeline</h3>
+          <span>active step is highlighted</span>
+        </div>
+        <div id="commandTimeline" class="command-timeline" aria-label="Command timeline"></div>
+      </div>
+
+      <div class="rule-summary">
+        <h3>Key Rules</h3>
+        <ul>
+          <li>Start with <code>START</code> and end with <code>STOP</code>.</li>
+          <li>Complete at least two <code>PICK</code> then <code>DROP</code> tasks.</li>
+          <li>Movement and turning consume energy.</li>
+          <li><code>RECHARGE</code> is allowed only at energy 0.</li>
+          <li>Must include four <code>F L</code> pairs and avoid four <code>F R</code> pairs.</li>
+        </ul>
+      </div>
+
+      <div class="messages">
+        <h3>Validation Messages</h3>
+        <ul id="messageList"></ul>
+      </div>
+    </section>
+
+    <section class="panel simulator-panel">
+      <div class="section-title">
+        <h2>Grid</h2>
+        <span id="stepCounter" class="badge neutral">Step 0</span>
+      </div>
+      <div class="current-command">
+        <span>Current command</span>
+        <strong id="currentCommandValue">None</strong>
+      </div>
+      <div id="grid" class="grid" aria-label="8 by 8 robot grid"></div>
+    </section>
+
+    <section class="panel status-panel">
+      <h2>Robot State</h2>
+      <dl class="status-grid">
+        <div>
+          <dt><span class="status-icon">XY</span> Position</dt>
+          <dd id="positionValue">(0, 0)</dd>
+        </div>
+        <div>
+          <dt><span class="status-icon">N</span> Direction</dt>
+          <dd id="directionValue">North</dd>
+        </div>
+        <div>
+          <dt><span class="status-icon">E</span> Energy</dt>
+          <dd id="energyValue">5 / 5</dd>
+          <div class="energy-dots" aria-label="Energy meter">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+        <div>
+          <dt><span class="status-icon">OBJ</span> Object</dt>
+          <dd id="carryingValue">Not carrying</dd>
+        </div>
+        <div>
+          <dt><span class="status-icon">2X</span> Tasks</dt>
+          <dd id="tasksValue">0</dd>
+        </div>
+        <div>
+          <dt><span class="status-icon">CMD</span> Last Command</dt>
+          <dd id="lastCommandValue">None</dd>
+        </div>
+      </dl>
+
+      <div class="log-box">
+        <h3>Execution Log</h3>
+        <ol id="executionLog"></ol>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
