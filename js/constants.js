@@ -1,4 +1,4 @@
-export const MAX_ENERGY = 5;
+export const MAX_ENERGY = 3;
 export const GRID_SIZE = 8;
 
 export const COMMANDS = new Set([

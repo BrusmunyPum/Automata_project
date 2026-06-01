@@ -21,23 +21,18 @@ export function validateCommands(commands) {
     };
   }
 
+  // Rule 1: must start with START and end with STOP
   validateStartAndStop(commands, errors);
 
-  // These variables are the DFA-style state. Each command updates this state,
-  // and invalid transitions add an error.
+  // DFA-style state variables
   let energy = MAX_ENERGY;
   let hasMoved = false;
   let carrying = false;
   let completedTasks = 0;
-  let lastMovement = null;
-  let lastTurn = null;
-  let leftCount = 0;
+  let lastTurn = null;       // Rule 10: no two turns in a row
+  let leftCount = 0;         // Rule 14: |left - right| <= 2
   let rightCount = 0;
   let seenStop = false;
-  let foundCounterClockwiseLoop = false;
-  let counterClockwisePairs = 0;
-  let clockwisePairs = 0;
-  let previousCommand = null;
   let x = 0;
   let y = 0;
   let direction = "N";
@@ -70,6 +65,7 @@ export function validateCommands(commands) {
       continue;
     }
 
+    // Rule 6: F and B consume 1 energy
     if (command === "F" || command === "B") {
       if (energy === 0) {
         errors.push(`Command ${position}: ${command} needs energy, but energy is 0.`);
@@ -88,28 +84,15 @@ export function validateCommands(commands) {
         y = nextY;
       }
 
-      if (lastMovement === "F" && command === "B") {
-        errors.push(`Command ${position}: B cannot immediately follow F.`);
-      }
-
-      if (lastMovement === "B" && command === "F") {
-        errors.push(`Command ${position}: F cannot immediately follow B.`);
-      }
-
       hasMoved = true;
-      lastMovement = command;
       lastTurn = null;
     }
 
+    // Rule 10 (overwrites Rule 5): no two turns in a row
+    // Turns do NOT cost energy (Rule 11 is not assigned)
     if (command === "L" || command === "R") {
-      if (energy === 0) {
-        errors.push(`Command ${position}: ${command} needs energy, but energy is 0.`);
-      } else {
-        energy -= 1;
-      }
-
-      if (lastTurn === command) {
-        errors.push(`Command ${position}: cannot turn ${command} twice in a row.`);
+      if (lastTurn !== null) {
+        errors.push(`Command ${position}: cannot turn twice in a row (${lastTurn} then ${command}).`);
       }
 
       if (command === "L") {
@@ -118,21 +101,21 @@ export function validateCommands(commands) {
         rightCount += 1;
       }
 
+      // Rule 14: |left - right| must not exceed 2
       if (Math.abs(leftCount - rightCount) > 2) {
         errors.push(`Command ${position}: |left turns - right turns| cannot exceed 2.`);
       }
 
       lastTurn = command;
-      lastMovement = null;
       direction = turn(direction, command);
     }
 
+    // Rule 3: PICK before DROP, no double PICK
     if (command === "PICK") {
       if (carrying) {
         errors.push(`Command ${position}: cannot PICK while already carrying an object.`);
       }
       carrying = true;
-      lastMovement = null;
       lastTurn = null;
     }
 
@@ -143,45 +126,23 @@ export function validateCommands(commands) {
         completedTasks += 1;
       }
       carrying = false;
-      lastMovement = null;
       lastTurn = null;
     }
 
+    // Rule 6: RECHARGE resets energy to full (no restriction on when)
     if (command === "RECHARGE") {
-      if (energy !== 0) {
-        errors.push(`Command ${position}: RECHARGE is only allowed when energy is exactly 0.`);
-      }
       energy = MAX_ENERGY;
-      lastMovement = null;
       lastTurn = null;
-    }
-
-    if (previousCommand === "F" && command === "L") {
-      counterClockwisePairs += 1;
-    }
-
-    if (previousCommand === "F" && command === "R") {
-      clockwisePairs += 1;
-    }
-
-    if (counterClockwisePairs >= 4) {
-      foundCounterClockwiseLoop = true;
-    }
-
-    if (clockwisePairs >= 4) {
-      errors.push(`Command ${position}: clockwise loop (F R) x4 is not allowed.`);
     }
 
     trace.push(snapshot(index, command, energy, carrying, completedTasks, leftCount, rightCount));
-    previousCommand = command;
   }
 
   validateFinalState({
     errors,
     hasMoved,
     completedTasks,
-    carrying,
-    foundCounterClockwiseLoop
+    carrying
   });
 
   return {
@@ -202,20 +163,19 @@ function validateStartAndStop(commands, errors) {
 }
 
 function validateFinalState(state) {
+  // Rule 2: at least one movement
   if (!state.hasMoved) {
     state.errors.push("The robot must perform at least one movement command: F or B.");
   }
 
+  // Rule 8 (overwrites Rule 4): at least TWO pick-drop tasks
   if (state.completedTasks < 2) {
     state.errors.push("The robot must complete at least two PICK-DROP tasks.");
   }
 
+  // Rule 3: cannot finish while carrying
   if (state.carrying) {
     state.errors.push("The robot cannot finish while still carrying an object.");
-  }
-
-  if (!state.foundCounterClockwiseLoop) {
-    state.errors.push("The sequence must include at least one counter-clockwise loop: (F L) x4.");
   }
 }
 

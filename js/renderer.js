@@ -55,7 +55,10 @@ export function renderState(elements, simulation, currentStep, commands = []) {
     cell.textContent = "";
 
     if (isRobotCell) {
-      cell.appendChild(createRobotMarker(simulation.direction));
+      const marker = document.createElement("span");
+      marker.className = `robot-marker face-${simulation.direction}`;
+      marker.setAttribute("aria-label", `Robot facing ${directionName(simulation.direction)}`);
+      cell.appendChild(marker);
     }
 
     cell.appendChild(coord);
@@ -119,23 +122,6 @@ function renderEnergy(elements, energy) {
   });
 }
 
-function createRobotMarker(direction) {
-  const marker = document.createElement("span");
-  marker.className = `robot-marker face-${direction}`;
-  marker.setAttribute("aria-label", `Robot facing ${directionName(direction)}`);
-
-  marker.innerHTML = `
-    <span class="robot-antenna"></span>
-    <span class="robot-head">
-      <span class="robot-eye"></span>
-      <span class="robot-eye"></span>
-    </span>
-    <span class="robot-body"></span>
-  `;
-
-  return marker;
-}
-
 export function showValidation(elements, result) {
   elements.messageList.innerHTML = "";
 
@@ -153,7 +139,7 @@ export function showValidation(elements, result) {
 
 export function setNotValidated(elements) {
   elements.validationBadge.textContent = "Not validated";
-  elements.validationBadge.className = "badge neutral";
+  elements.validationBadge.className = "badge";
 }
 
 function renderLog(elements, log) {

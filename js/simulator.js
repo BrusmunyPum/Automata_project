@@ -51,7 +51,7 @@ export function applySimulationCommand(state, command) {
 
   if (command === "RECHARGE") {
     next.energy = MAX_ENERGY;
-    next.log.push("RECHARGE: energy restored to 5");
+    next.log.push(`RECHARGE: energy restored to ${MAX_ENERGY}`);
     return next;
   }
 
@@ -68,9 +68,9 @@ function moveRobot(state, command) {
   return state;
 }
 
+// Turns do NOT cost energy (Rule 11 is not assigned)
 function turnRobot(state, command) {
   state.direction = turn(state.direction, command);
-  state.energy -= 1;
   state.log.push(`${command}: facing ${directionName(state.direction)}`);
   return state;
 }
