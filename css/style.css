@@ -457,6 +457,12 @@ code {
   border: 1px solid var(--border);
   font-size: 10px;
   color: var(--muted);
+  cursor: pointer;
+}
+
+.cell:hover {
+  outline: 2px solid rgba(37, 99, 235, 0.45);
+  outline-offset: -2px;
 }
 
 .cell.visited {

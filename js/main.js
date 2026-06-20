@@ -162,13 +162,13 @@ elements.commandInput.addEventListener("input", () => {
   validationResult = null;
   setNotValidated(elements);
 });
-elements.objectInput.addEventListener("input", () => {
-  stopRun();
-  validationResult = null;
-  live = createLiveState(getObjectPositions().positions);
-  renderTimeline(elements, [], 0);
-  syncLive(0);
-  setNotValidated(elements);
+elements.objectInput.addEventListener("input", applyObjectConfig);
+elements.grid.addEventListener("click", (event) => {
+  const cell = event.target.closest(".cell");
+  if (!cell) {
+    return;
+  }
+  toggleObjectAt(Number(cell.dataset.x), Number(cell.dataset.y));
 });
 
 buildGrid(elements);
@@ -191,14 +191,13 @@ function validateWorldActions(commands, objectPositions) {
   return { valid: true, errors };
 }
 
-function getObjectPositions() {
-  const raw = elements.objectInput?.value.trim() || DEFAULT_OBJECTS.join(" ");
-  const tokens = raw.split(/\s+/).filter(Boolean);
+// Parse a raw "x,y x,y ..." string into deduped, in-grid object keys.
+function parseObjectTokens(raw) {
   const positions = [];
   const seen = new Set();
   const errors = [];
 
-  tokens.forEach((token) => {
+  raw.split(/\s+/).filter(Boolean).forEach((token) => {
     const match = token.match(/^(\d+),(\d+)$/);
     if (!match) {
       errors.push(`Object "${token}" must use x,y format, for example 2,1.`);
@@ -220,6 +219,13 @@ function getObjectPositions() {
     }
   });
 
+  return { positions, errors };
+}
+
+function getObjectPositions() {
+  const raw = elements.objectInput?.value.trim() || DEFAULT_OBJECTS.join(" ");
+  const { positions, errors } = parseObjectTokens(raw);
+
   if (!positions.length) {
     errors.push("Add at least one pickup object.");
   }
@@ -229,4 +235,49 @@ function getObjectPositions() {
     positions: positions.length ? positions : DEFAULT_OBJECTS,
     errors
   };
+}
+
+function compareKeys(a, b) {
+  const [ax, ay] = a.split(",").map(Number);
+  const [bx, by] = b.split(",").map(Number);
+  return ax - bx || ay - by;
+}
+
+// Click a grid cell to add an object there, or remove it if one exists.
+function toggleObjectAt(x, y) {
+  const key = `${x},${y}`;
+  const { positions } = parseObjectTokens(elements.objectInput.value.trim());
+  const set = new Set(positions);
+
+  if (set.has(key)) {
+    set.delete(key);
+  } else {
+    set.add(key);
+  }
+
+  elements.objectInput.value = [...set].sort(compareKeys).join(" ");
+  applyObjectConfig();
+}
+
+// Rebuild the robot world from the current object configuration and give feedback.
+function applyObjectConfig() {
+  stopRun();
+  validationResult = null;
+
+  const { positions, errors } = parseObjectTokens(elements.objectInput.value.trim());
+  live = createLiveState(positions);
+  runIndex = 0;
+  renderTimeline(elements, [], 0);
+  syncLive(0);
+
+  if (errors.length) {
+    setLiveMessage(elements, errors[0], "error");
+    setBadge(elements, "Object error", "error");
+  } else if (positions.length < 2) {
+    setLiveMessage(elements, "Add at least two pickup objects (Rule 8 needs two PICK-DROP tasks).", "error");
+    setBadge(elements, "Need objects", "error");
+  } else {
+    setLiveMessage(elements, `Objects: ${positions.join("  ")}. Click START to drive.`, "success");
+    setBadge(elements, "Ready", null);
+  }
 }
