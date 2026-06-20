@@ -10,6 +10,9 @@ export function getElements() {
     validationBadge: document.getElementById("validationBadge"),
     messageList: document.getElementById("messageList"),
     commandTimeline: document.getElementById("commandTimeline"),
+    controlPad: document.getElementById("controlPad"),
+    cmdButtons: document.querySelectorAll(".cmd-btn"),
+    liveSequence: document.getElementById("liveSequence"),
     grid: document.getElementById("grid"),
     stepCounter: document.getElementById("stepCounter"),
     currentCommandValue: document.getElementById("currentCommandValue"),
@@ -44,7 +47,7 @@ export function buildGrid(elements) {
   }
 }
 
-export function renderState(elements, simulation, currentStep, commands = []) {
+export function renderState(elements, simulation, currentStep = 0) {
   document.querySelectorAll(".cell").forEach((cell) => {
     const key = `${cell.dataset.x},${cell.dataset.y}`;
     const isRobotCell = Number(cell.dataset.x) === simulation.x && Number(cell.dataset.y) === simulation.y;
@@ -75,7 +78,49 @@ export function renderState(elements, simulation, currentStep, commands = []) {
   elements.stepCounter.textContent = `Step ${currentStep}`;
 
   renderLog(elements, simulation.log);
-  renderTimeline(elements, commands, currentStep);
+}
+
+export function renderLiveSequence(elements, live) {
+  elements.liveSequence.innerHTML = "";
+
+  if (!live.sequence.length) {
+    const empty = document.createElement("span");
+    empty.className = "live-empty";
+    empty.textContent = "Click START to begin driving.";
+    elements.liveSequence.appendChild(empty);
+    return;
+  }
+
+  live.sequence.forEach((command) => {
+    const token = document.createElement("span");
+    token.className = "timeline-token done";
+    token.textContent = command;
+    elements.liveSequence.appendChild(token);
+  });
+
+  if (live.stopped) {
+    elements.liveSequence.lastChild.classList.add("active");
+  }
+}
+
+// Enable only the commands the automaton would accept as the next move.
+export function updatePad(elements, allowed) {
+  elements.cmdButtons.forEach((button) => {
+    button.disabled = !allowed.has(button.dataset.cmd);
+  });
+}
+
+export function setLiveMessage(elements, text, kind) {
+  elements.messageList.innerHTML = "";
+  const item = document.createElement("li");
+  item.className = kind === "error" ? "message-error" : "message-success";
+  item.textContent = text;
+  elements.messageList.appendChild(item);
+}
+
+export function setBadge(elements, text, kind) {
+  elements.validationBadge.textContent = text;
+  elements.validationBadge.className = kind ? `badge ${kind}` : "badge";
 }
 
 export function renderTimeline(elements, commands, currentStep) {

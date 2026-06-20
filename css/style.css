@@ -191,6 +191,71 @@ button.ghost {
   color: var(--muted);
 }
 
+/* ── Manual Drive control pad ─────────────────────────────────── */
+.manual-drive {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  padding: 10px;
+}
+
+.control-pad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.cmd-btn {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 10px 0;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+.cmd-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cmd-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cmd-btn.cmd-start {
+  grid-column: 1 / -1;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.cmd-btn.cmd-stop {
+  grid-column: 1 / -1;
+  background: var(--red-bg);
+  border-color: rgba(220, 38, 38, 0.4);
+  color: var(--red);
+}
+
+.cmd-btn.cmd-start:disabled,
+.cmd-btn.cmd-stop:disabled {
+  filter: grayscale(0.5);
+}
+
+.live-sequence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+  min-height: 24px;
+  max-height: 90px;
+  overflow: auto;
+}
+
+.live-empty {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 /* ── Hint ─────────────────────────────────────────────────────── */
 .hint {
   font-size: 12px;

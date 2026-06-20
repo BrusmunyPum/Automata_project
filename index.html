@@ -30,12 +30,33 @@
 
         <div class="button-row">
           <button id="validateBtn" class="primary">Validate</button>
-          <button id="runBtn" class="secondary">Run</button>
+          <button id="runBtn" class="secondary">Auto-Run</button>
           <button id="resetBtn" class="ghost">Reset</button>
         </div>
 
         <div class="hint">
           Alphabet: <code>START</code> <code>STOP</code> <code>F</code> <code>B</code> <code>L</code> <code>R</code> <code>PICK</code> <code>DROP</code> <code>RECHARGE</code>
+        </div>
+
+        <div class="manual-drive">
+          <div class="mini-title">
+            <h3>Manual Drive</h3>
+            <span>click a command to move the robot yourself</span>
+          </div>
+          <div id="controlPad" class="control-pad">
+            <button class="cmd-btn cmd-start" data-cmd="START">START</button>
+            <button class="cmd-btn cmd-move" data-cmd="F">F &uarr;</button>
+            <button class="cmd-btn cmd-move" data-cmd="B">B &darr;</button>
+            <button class="cmd-btn cmd-turn" data-cmd="L">L &#8630;</button>
+            <button class="cmd-btn cmd-turn" data-cmd="R">R &#8631;</button>
+            <button class="cmd-btn cmd-task" data-cmd="PICK">PICK</button>
+            <button class="cmd-btn cmd-task" data-cmd="DROP">DROP</button>
+            <button class="cmd-btn cmd-power" data-cmd="RECHARGE">RECHARGE</button>
+            <button class="cmd-btn cmd-stop" data-cmd="STOP">STOP</button>
+          </div>
+          <div id="liveSequence" class="live-sequence">
+            <span class="live-empty">Click START to begin driving.</span>
+          </div>
         </div>
 
         <div class="timeline-panel">
