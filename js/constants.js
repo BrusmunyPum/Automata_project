@@ -1,5 +1,6 @@
 export const MAX_ENERGY = 3;
 export const GRID_SIZE = 8;
+export const DEFAULT_OBJECTS = ["2,1", "4,2"];
 
 export const COMMANDS = new Set([
   "START",

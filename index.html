@@ -38,6 +38,12 @@
           Alphabet: <code>START</code> <code>STOP</code> <code>F</code> <code>B</code> <code>L</code> <code>R</code> <code>PICK</code> <code>DROP</code> <code>RECHARGE</code>
         </div>
 
+        <div class="world-setup">
+          <label for="objectInput">Pickup Objects</label>
+          <input id="objectInput" type="text" value="2,1 4,2" spellcheck="false">
+          <p>Use grid coordinates like <code>2,1</code>. The robot can PICK only when it stands on an object.</p>
+        </div>
+
         <div class="manual-drive">
           <div class="mini-title">
             <h3>Manual Drive</h3>
@@ -72,7 +78,7 @@
           <ul>
             <li><strong>1.</strong> Start with START, end with STOP</li>
             <li><strong>2.</strong> At least one movement (F or B)</li>
-            <li><strong>3.</strong> PICK before DROP; no double PICK</li>
+            <li><strong>3.</strong> PICK only on an object; DROP after PICK; no double PICK</li>
             <li><strong>6.</strong> Movement costs energy (max 3); RECHARGE resets to full</li>
             <li><strong>8.</strong> At least 2 complete PICK-DROP tasks (overwrites #4)</li>
             <li><strong>10.</strong> No two turns in a row (overwrites #5)</li>

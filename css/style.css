@@ -271,6 +271,45 @@ code {
   padding: 1px 4px;
 }
 
+/* ── World setup ──────────────────────────────────────────────── */
+.world-setup {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  padding: 10px;
+}
+
+.world-setup label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.world-setup input {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px 10px;
+  font: 13px/1.4 var(--mono);
+}
+
+.world-setup input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.world-setup p {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
 /* ── Command Timeline ─────────────────────────────────────────── */
 .timeline-panel {
   margin-top: 12px;
@@ -425,6 +464,14 @@ code {
   border-color: rgba(37, 99, 235, 0.3);
 }
 
+.cell.has-object {
+  background: rgba(217, 119, 6, 0.1);
+}
+
+.cell.delivered {
+  background: rgba(22, 163, 74, 0.1);
+}
+
 .coord {
   position: absolute;
   bottom: 1px;
@@ -454,6 +501,33 @@ code {
 .robot-marker.face-E::after { content: ">"; }
 .robot-marker.face-S::after { content: "v"; }
 .robot-marker.face-W::after { content: "<"; }
+
+.object-marker,
+.delivered-marker {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 16px;
+  padding: 0 4px;
+  border: 1px solid currentColor;
+  background: var(--surface);
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.object-marker {
+  color: var(--amber);
+}
+
+.delivered-marker {
+  color: var(--green);
+}
 
 /* Remove old robot parts */
 .robot-antenna,

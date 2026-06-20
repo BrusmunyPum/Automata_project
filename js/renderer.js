@@ -4,6 +4,7 @@ import { directionName } from "./movement.js";
 export function getElements() {
   return {
     commandInput: document.getElementById("commandInput"),
+    objectInput: document.getElementById("objectInput"),
     validateBtn: document.getElementById("validateBtn"),
     runBtn: document.getElementById("runBtn"),
     resetBtn: document.getElementById("resetBtn"),
@@ -55,7 +56,25 @@ export function renderState(elements, simulation, currentStep = 0) {
 
     cell.classList.toggle("visited", simulation.visited.has(key));
     cell.classList.toggle("robot", isRobotCell);
+    cell.classList.toggle("has-object", simulation.objects.has(key));
+    cell.classList.toggle("delivered", simulation.delivered.has(key));
     cell.textContent = "";
+
+    if (simulation.objects.has(key)) {
+      const object = document.createElement("span");
+      object.className = "object-marker";
+      object.setAttribute("aria-label", "Pickup object");
+      object.textContent = "OBJ";
+      cell.appendChild(object);
+    }
+
+    if (simulation.delivered.has(key)) {
+      const delivered = document.createElement("span");
+      delivered.className = "delivered-marker";
+      delivered.setAttribute("aria-label", "Delivered object");
+      delivered.textContent = "OK";
+      cell.appendChild(delivered);
+    }
 
     if (isRobotCell) {
       const marker = document.createElement("span");

@@ -1,4 +1,4 @@
-import { MAX_ENERGY } from "./constants.js";
+import { DEFAULT_OBJECTS, MAX_ENERGY } from "./constants.js";
 import { directionName, getMovementDelta, isInsideGrid, turn } from "./movement.js";
 
 // Live automaton: the user drives the robot one command at a time.
@@ -6,7 +6,7 @@ import { directionName, getMovementDelta, isInsideGrid, turn } from "./movement.
 // (automaton.js). A rejected command leaves the state unchanged and
 // returns an error message instead of moving the robot.
 
-export function createLiveState() {
+export function createLiveState(objectPositions = DEFAULT_OBJECTS) {
   return {
     x: 0,
     y: 0,
@@ -23,6 +23,8 @@ export function createLiveState() {
     lastCommand: "None",
     sequence: [],
     visited: new Set(["0,0"]),
+    objects: new Set(objectPositions),
+    delivered: new Set(),
     log: []
   };
 }
@@ -107,8 +109,13 @@ export function applyLiveCommand(state, command) {
     if (state.carrying) {
       return fail(state, "Cannot PICK: already carrying an object (DROP first).");
     }
-    const next = commit(state, "PICK", "PICK: object collected");
+    const key = `${state.x},${state.y}`;
+    if (!state.objects.has(key)) {
+      return fail(state, `Cannot PICK: no object at (${state.x}, ${state.y}).`);
+    }
+    const next = commit(state, "PICK", `PICK: object collected at (${state.x}, ${state.y})`);
     next.carrying = true;
+    next.objects.delete(key);
     next.lastTurn = null;
     return ok(next);
   }
@@ -119,10 +126,12 @@ export function applyLiveCommand(state, command) {
       return fail(state, "Cannot DROP: not carrying anything (PICK first).");
     }
     const next = commit(state, "DROP", null);
+    const key = `${state.x},${state.y}`;
     next.carrying = false;
     next.completedTasks += 1;
     next.lastTurn = null;
-    next.log.push(`DROP: task completed (${next.completedTasks} total)`);
+    next.delivered.add(key);
+    next.log.push(`DROP: object delivered at (${state.x}, ${state.y}) (${next.completedTasks} total)`);
     return ok(next);
   }
 
@@ -153,6 +162,8 @@ function commit(state, command, logEntry) {
   const next = {
     ...state,
     visited: new Set(state.visited),
+    objects: new Set(state.objects),
+    delivered: new Set(state.delivered),
     log: [...state.log],
     sequence: [...state.sequence, command],
     lastCommand: command

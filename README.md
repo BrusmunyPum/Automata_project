@@ -11,9 +11,10 @@ No installation, build command, or external library is required. The project use
 ## How To Use
 
 1. Type or edit a command sequence in the command box.
-2. Click `Validate` to check the sequence.
-3. If the sequence is valid, click `Run` to simulate the robot.
-4. Click `Reset` to return the robot to the starting state.
+2. Edit the pickup object coordinates if you want a different world layout.
+3. Click `Validate` to check the sequence.
+4. If the sequence is valid, click `Auto-Run` to simulate the robot.
+5. Click `Reset` to return the robot to the starting state.
 
 ## Command Alphabet
 
@@ -43,6 +44,16 @@ Meaning:
 - `DROP`: drop the object
 - `RECHARGE`: reset energy to full
 
+## Pickup Objects
+
+The simulator includes real objects on the grid. Enter object positions in the `Pickup Objects` box with `x,y` coordinates separated by spaces:
+
+```text
+2,1 4,2
+```
+
+The robot can use `PICK` only when it is standing on a cell that contains an object. `DROP` places a delivered marker on the current cell.
+
 ## Main Rules
 
 The validator checks these rules before simulation:
@@ -51,23 +62,21 @@ The validator checks these rules before simulation:
 - The sequence must end with `STOP`.
 - The robot must perform at least one movement command: `F` or `B`.
 - The robot must complete at least two `PICK` then `DROP` tasks.
+- The robot cannot `PICK` unless an object exists at the current cell.
 - The robot cannot `DROP` before `PICK`.
 - The robot cannot `PICK` twice without dropping.
 - The robot cannot finish while still carrying an object.
 - The robot cannot immediately reverse movement:
   - `F` followed immediately by `B` is invalid.
   - `B` followed immediately by `F` is invalid.
-- The robot cannot turn the same direction twice in a row:
-  - `L L` is invalid.
-  - `R R` is invalid.
-- Energy capacity is 5.
-- `F`, `B`, `L`, and `R` each consume 1 energy.
-- Movement or turning is invalid when energy is 0.
-- `RECHARGE` is only valid when energy is exactly 0.
+- The robot cannot turn twice in a row:
+  - `L L`, `L R`, `R L`, and `R R` are invalid.
+- Energy capacity is 3.
+- `F` and `B` each consume 1 energy.
+- Movement is invalid when energy is 0.
+- `RECHARGE` resets energy to full.
 - The robot must stay inside the 8x8 grid.
 - At any point, `|number of L turns - number of R turns| <= 2`.
-- The sequence must include at least four `F L` pairs.
-- The sequence must not include four `F R` pairs.
 
 ## Starting State
 
@@ -76,7 +85,7 @@ The robot starts with:
 ```text
 Position: (0, 0)
 Direction: North
-Energy: 5 / 5
+Energy: 3 / 3
 Carrying object: No
 Completed tasks: 0
 ```
@@ -95,7 +104,7 @@ START R F L F R RECHARGE F L PICK DROP F R F RECHARGE F L PICK DROP F L STOP
 START F R F R F R F R PICK PICK DROP STOP
 ```
 
-This is invalid because it creates a clockwise loop and also attempts to pick twice without dropping.
+This is invalid because it attempts to turn twice in a row and also attempts to pick twice without dropping.
 
 ## Project Structure
 
@@ -109,7 +118,7 @@ This is invalid because it creates a clockwise loop and also attempts to pick tw
 +-- js/
     +-- main.js
     +-- automaton.js
-    +-- simulator.js
+    +-- live.js
     +-- renderer.js
     +-- movement.js
     +-- constants.js
@@ -121,7 +130,7 @@ This is invalid because it creates a clockwise loop and also attempts to pick tw
 - `css/style.css`: all UI styling and animation
 - `js/main.js`: connects buttons, validation, running, and reset
 - `js/automaton.js`: validates command sequences using automaton state variables
-- `js/simulator.js`: updates robot state during simulation
+- `js/live.js`: updates robot state during manual driving and auto-run
 - `js/renderer.js`: updates the grid, status cards, timeline, logs, and energy UI
 - `js/movement.js`: helper functions for movement, turning, direction names, and grid bounds
 - `js/constants.js`: shared constants such as grid size, max energy, directions, and command alphabet
@@ -140,8 +149,8 @@ lastTurn
 leftCount
 rightCount
 seenStop
-counterClockwisePairs
-clockwisePairs
+objects
+delivered
 position
 direction
 ```
