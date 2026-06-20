@@ -63,16 +63,16 @@ export function renderState(elements, simulation, currentStep = 0) {
     if (simulation.objects.has(key)) {
       const object = document.createElement("span");
       object.className = "object-marker";
+      object.setAttribute("role", "img");
       object.setAttribute("aria-label", "Pickup object");
-      object.textContent = "OBJ";
       cell.appendChild(object);
     }
 
     if (simulation.delivered.has(key)) {
       const delivered = document.createElement("span");
       delivered.className = "delivered-marker";
+      delivered.setAttribute("role", "img");
       delivered.setAttribute("aria-label", "Delivered object");
-      delivered.textContent = "OK";
       cell.appendChild(delivered);
     }
 
