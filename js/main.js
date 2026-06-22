@@ -1,5 +1,5 @@
 import { tokenize, validateCommands } from "./automaton.js";
-import { DEFAULT_OBJECTS, GRID_SIZE } from "./constants.js";
+import { DEFAULT_OBJECTS, GRID_SIZE, MIN_OBJECTS } from "./constants.js";
 import { allowedCommands, applyLiveCommand, createLiveState } from "./live.js";
 import {
   buildGrid,
@@ -10,6 +10,7 @@ import {
   setBadge,
   setLiveMessage,
   setNotValidated,
+  showToast,
   showValidation,
   updatePad
 } from "./renderer.js";
@@ -27,10 +28,19 @@ let runIndex = 0;
 function drive(command) {
   stopRun();
 
+  if (!hasMinObjects()) {
+    const message = `The robot cannot move with fewer than ${MIN_OBJECTS} objects. Add objects on the grid first.`;
+    setLiveMessage(elements, message, "error");
+    setBadge(elements, "Need objects", "error");
+    showToast(message, "error");
+    return;
+  }
+
   const result = applyLiveCommand(live, command);
   if (!result.ok) {
     setLiveMessage(elements, result.error, "error");
     setBadge(elements, "Blocked", "error");
+    showToast(result.error, "error");
     updatePad(elements, allowedCommands(live));
     return;
   }
@@ -39,11 +49,17 @@ function drive(command) {
   syncLive(live.sequence.length);
 
   if (live.stopped) {
-    setLiveMessage(elements, "Sequence accepted by the automaton. ✓", "success");
+    const message = `Sequence accepted — robot picked and dropped at least ${MIN_OBJECTS} objects. ✓`;
+    setLiveMessage(elements, message, "success");
     setBadge(elements, "Accepted", "success");
+    showToast(message, "success");
   } else {
     setLiveMessage(elements, `${command} accepted.`, "success");
     setBadge(elements, "Driving", null);
+    // Tell the user the moment the run becomes finishable.
+    if (command === "DROP" && live.completedTasks === MIN_OBJECTS) {
+      showToast(`${MIN_OBJECTS} tasks complete — you can STOP now.`, "info");
+    }
   }
 }
 
@@ -69,7 +85,9 @@ function resetRobot() {
 function syncLive(currentStep) {
   renderState(elements, live, currentStep);
   renderLiveSequence(elements, live);
-  updatePad(elements, allowedCommands(live));
+  // The whole control pad is disabled until at least MIN_OBJECTS objects exist.
+  const allowed = hasMinObjects() ? allowedCommands(live) : new Set();
+  updatePad(elements, allowed);
 }
 
 // ── Typed sequence: validate + optional auto-run ────────────────
@@ -110,6 +128,9 @@ function validateFromInput() {
 function autoRun() {
   const result = validateFromInput();
   if (!result.valid) {
+    if (result.errors && result.errors.length) {
+      showToast(result.errors[0], "error");
+    }
     return;
   }
 
@@ -130,6 +151,7 @@ function autoRun() {
     if (!stepResult.ok) {
       setLiveMessage(elements, `Auto-run stopped: ${stepResult.error}`, "error");
       setBadge(elements, "Blocked", "error");
+      showToast(`Auto-run stopped: ${stepResult.error}`, "error");
       stopRun();
       return;
     }
@@ -226,8 +248,8 @@ function getObjectPositions() {
   const raw = elements.objectInput?.value.trim() || DEFAULT_OBJECTS.join(" ");
   const { positions, errors } = parseObjectTokens(raw);
 
-  if (!positions.length) {
-    errors.push("Add at least one pickup object.");
+  if (positions.length < MIN_OBJECTS) {
+    errors.push(`You need at least ${MIN_OBJECTS} pickup objects (Rule 8 needs two PICK-DROP tasks).`);
   }
 
   return {
@@ -235,6 +257,10 @@ function getObjectPositions() {
     positions: positions.length ? positions : DEFAULT_OBJECTS,
     errors
   };
+}
+
+function hasMinObjects() {
+  return parseObjectTokens(elements.objectInput.value.trim()).positions.length >= MIN_OBJECTS;
 }
 
 function compareKeys(a, b) {
@@ -250,6 +276,13 @@ function toggleObjectAt(x, y) {
   const set = new Set(positions);
 
   if (set.has(key)) {
+    if (set.size <= MIN_OBJECTS) {
+      const message = `You must keep at least ${MIN_OBJECTS} objects — this one cannot be removed.`;
+      setLiveMessage(elements, message, "error");
+      setBadge(elements, "Need objects", "error");
+      showToast(message, "error");
+      return;
+    }
     set.delete(key);
   } else {
     set.add(key);
@@ -273,9 +306,12 @@ function applyObjectConfig() {
   if (errors.length) {
     setLiveMessage(elements, errors[0], "error");
     setBadge(elements, "Object error", "error");
-  } else if (positions.length < 2) {
-    setLiveMessage(elements, "Add at least two pickup objects (Rule 8 needs two PICK-DROP tasks).", "error");
+    showToast(errors[0], "error");
+  } else if (positions.length < MIN_OBJECTS) {
+    const message = `Add at least ${MIN_OBJECTS} pickup objects (Rule 8 needs two PICK-DROP tasks).`;
+    setLiveMessage(elements, message, "error");
     setBadge(elements, "Need objects", "error");
+    showToast(message, "error");
   } else {
     setLiveMessage(elements, `Objects: ${positions.join("  ")}. Click START to drive.`, "success");
     setBadge(elements, "Ready", null);

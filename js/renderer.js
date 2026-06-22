@@ -142,6 +142,28 @@ export function setBadge(elements, text, kind) {
   elements.validationBadge.className = kind ? `badge ${kind}` : "badge";
 }
 
+// Pop-up alert that appears prominently and fades out on its own.
+let toastTimer = null;
+export function showToast(message, kind = "info") {
+  let toast = document.getElementById("toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+    toast.setAttribute("role", "alert");
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = message;
+  toast.className = `toast toast-${kind} show`;
+
+  if (toastTimer) {
+    window.clearTimeout(toastTimer);
+  }
+  toastTimer = window.setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3400);
+}
+
 export function renderTimeline(elements, commands, currentStep) {
   elements.commandTimeline.innerHTML = "";
 
